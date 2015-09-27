@@ -1,90 +1,48 @@
 module Rockerfile
   class Engine
 
-    attr_reader :path, :context
+    attr_reader :path, :plugin_manager
 
-    def initialize(path, context = {})
-      @path = path
-      @context = context
+    def initialize
+      @plugin_manager = PluginManager.new(self)
     end
 
-    def render
+    def render(path)
       lines = []
       File.open(path) do |f|
         f.each do |line|
-          lines << process(line)
+          lines += process(line).map(&:strip)
         end
       end
-      lines.join("\n")
+      lines.join("\n").strip
     end
 
     def process(line)
-      command, rest = line.strip.split(/\s+/, 2)
-      rest = interpolate_variables(rest)
-      if rockerfile_command?(command)
-        process_command(command, rest)
-      else
-        passthrough(command, rest)
-      end
-    end
+      line = line.strip
 
-    def rockerfile_command?(command)
-      %w[SET INCLUDE DADD].include?(command)
+      line = plugin_manager.preprocess(line)
+
+      command, rest = line.strip.split(/\s+/, 2)
+      command ||= ""; rest ||= ""
+      command = command.upcase
+
+      if (plugin = plugin_manager.command_map[command])
+        text = plugin.send("command_#{command}", rest, plugin.context)
+      else
+        text = passthrough(command, rest)
+      end
+
+      if text.nil?
+        []
+      elsif text == ""
+        [""]
+      else
+        text.split("\n")
+      end
     end
 
     def passthrough(command, rest)
-      "#{command.upcase} #{rest}"
-    end
-
-    def process_command(command, rest)
-      case command.upcase
-      when "SET"
-        process_set(rest)
-      when "INCLUDE"
-        process_include(rest)
-      when "DADD"
-        process_dadd(rest)
-      end
-    end
-
-    def interpolate_variables(rest)
-      context.each do |k, v|
-        rest = rest.gsub(/:#{k}/, v)
-      end
-      rest
-    end
-
-    def process_set(rest)
-      k, v = rest.split
-      raise "invalid SET command: too many arguments: #{rest}" if k.kind_of?(Array) || v.kind_of?(Array)
-      context[k] = v unless context.has_key?(k)
-      ""
-    end
-
-    def process_include(rest)
-      rest = rest.strip
-      raise "invalid INCLUDE command: too many arguments: #{rest}" if rest =~ /\s+/
-      Engine.new(rest, context).render
-    end
-
-    def process_dadd(rest)
-      src, dst = rest.split
-
-      raise "invalid DADD command: too many arguments: #{rest}" if src.kind_of?(Array) || dst.kind_of?(Array)
-      case src
-      when /gz$/
-        z = "z"
-      when /bz2$/
-        z = "j"
-      else
-        z = ""
-      end
-
-      <<-STR
-COPY #{src} /tmp/
-RUN mkdir #{dst}
-RUN tar x#{z}f /tmp/#{src} -C #{dst} --strip-components 1
-      STR
+      "#{command.upcase} #{rest}".strip
     end
 
   end

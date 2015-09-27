@@ -1,11 +1,26 @@
 #!/usr/bin/env ruby
 
 require "commander/import"
+require "rockerfile"
 
 program :version, '1.0.0'
-program :description, 'Ruby layer over docker build with niceties'
+program :description, 'Build Rockerfiles'
 default_command :build
 always_trace!
+
+command "output" do |c|
+  c.name = "rocker output"
+  c.syntax = "rocker output [options]"
+  c.description = "Output a Dockerfile from a Rockerfile"
+  c.option "-f",
+           "--file STRING",
+           String,
+           "File to build. Default: Rockerfile"
+
+  c.when_called do |args, opts|
+    puts Rockerfile::Engine.new.render(opts.file)
+  end
+end
 
 command "build" do |c|
   c.name = "rocker build"
@@ -38,15 +53,15 @@ command "build" do |c|
       tag = "-t #{full_tag}"
     end
 
-    puts Rockerfile::Engine.new(opts.file).render
-    # begin
-    #   temp_file = "Rockerfile-#{SecureRandom.hex(4)}"
-    #   File.open(temp_file, "w") do |f|
-    #     f.write Template.new.render(opts.file)
-    #   end
-    #   puts "docker build -f #{temp_file} #{tag} ."
-    #   system("docker build -f #{temp_file} #{tag} .")
-    # ensure
-    #   FileUtils.rm_f(temp_file)
-    # end
+    begin
+      temp_file = "Rockerfile-#{SecureRandom.hex(4)}"
+      File.open(temp_file, "w") do |f|
+        f.write Rockerfile::Engine.new.render(opts.file)
+      end
+      puts "docker build -f #{temp_file} #{tag} ."
+      system("docker build -f #{temp_file} #{tag} .")
+    ensure
+      FileUtils.rm_f(temp_file)
+    end
   end
+end
