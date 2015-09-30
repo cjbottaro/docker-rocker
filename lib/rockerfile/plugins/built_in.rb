@@ -2,23 +2,26 @@ require "rockerfile/plugin"
 
 module Rockerfile
   module Plugins
-    class Base
+    class BuiltIn
       include Plugin
 
-      command "SET" do |line, context|
+      expand "SET" do |line|
         k, v = line.split
         raise "invalid SET command: too many arguments: #{line}" if k.kind_of?(Array) || v.kind_of?(Array)
+
         context[:set] ||= {}
         context[:set][k] = v unless context[:set].has_key?(v)
+
         nil
       end
 
-      command "INCLUDE" do |line, context|
+      expand "INCLUDE" do |line|
         raise "invalid INCLUDE command: too many arguments: #{line}" if line =~ /\s+/
+
         engine.render(line)
       end
 
-      command "DADD" do |line, context|
+      expand "DADD" do |line|
         src, dst = line.split
         raise "invalid DADD command: too many arguments: #{line}" if src.kind_of?(Array) || dst.kind_of?(Array)
 
@@ -38,7 +41,7 @@ module Rockerfile
         STR
       end
 
-      def preprocess(line, context)
+      transform /.+/ do |line, match|
         (context[:set] || {}).each do |k, v|
           line = line.gsub(/#{k}/, v)
         end

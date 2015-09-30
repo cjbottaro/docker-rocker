@@ -27,18 +27,21 @@ module Rockerfile
 
     module ClassMethods
 
-      def commands
-        @commands ||= []
+      def instructions
+        @instructions ||= {}
       end
 
-      def command(name, &block)
-        name = name.to_s.strip.upcase
-        self.commands << name
-        define_method("command_#{name}", &block)
+      def transformations
+        @transformations ||= {}
       end
 
-      def preprocess(&block)
-        define_method("preprocess", &block)
+      def expand(instruction, &block)
+        instruction = instruction.to_s.gsub(/\s+/, " ").strip.upcase
+        instructions[instruction] = block
+      end
+
+      def transform(regex = /.+/, &block)
+        transformations[regex] = block
       end
 
     end

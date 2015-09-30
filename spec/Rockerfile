@@ -1,0 +1,19 @@
+FROM ubuntu:14.04
+EXPOSE 9200
+ENV JAVA_HOME=/usr/local/jre
+
+# Copy over stuff
+DADD :java_tar /usr/local/jre
+DADD :elasticsearch_tar /usr/local/elasticsearch
+
+COPY elasticsearch.yml /usr/local/elasticsearch/config/
+
+# Persistent data
+VOLUME /usr/local/elasticsearch
+
+# Symlink to more standard locations.
+RUN mkdir /var/data
+RUN ln -s /usr/local/elasticsearch/data/ /var/data/elasticsearch
+RUN ln -s /usr/local/elasticsearch/logs/ /var/log/elasticsearch
+
+ENTRYPOINT ["/usr/local/elasticsearch/bin/elasticsearch"]
