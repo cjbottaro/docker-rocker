@@ -1,17 +1,17 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'docker-rocker/version'
+require 'docker_rocker/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "docker-rocker"
-  spec.version       = docker-rocker::VERSION
+  spec.version       = DockerRocker::VERSION
   spec.authors       = ["Christopher J. Bottaro"]
   spec.email         = ["cjbottaro@alumni.cs.utexas.edu"]
 
   spec.summary       = %q{Tools to make working with docker less painful, including a Dockerfile preprocessor}
   spec.description   = %q{Tools to make working with docker less painful, including a Dockerfile preprocessor}
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.homepage      = "https://github.com/cjbottaro/docker-rocker"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org by setting 'allowed_push_host', or
