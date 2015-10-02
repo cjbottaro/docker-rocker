@@ -3,19 +3,27 @@ module DockerRocker
 
     attr_reader :path, :plugin_manager
 
-    def initialize
+    def initialize(path)
+      @path = path
+      @base_dir = File.dirname(path)
+
+      # Search for plugins before initializing the plugin manager.
+      tokens = @base_dir.split("/")
+      while !tokens.empty?
+        directory = tokens.join("/")
+        Dir.glob("#{directory}/*.drp.rb").each{ |path| require(path) }
+        tokens.pop
+      end
+
       @plugin_manager = PluginManager.new(self)
-      @base_dir = nil
     end
 
-    def render(path)
+    def render(path = nil)
 
-      # On first invocation, grab the base dir so that we
-      # can make recursive invocations relative to it.
-      if !@base_dir
-        @base_dir = File.dirname(path)
-      else
+      if path
         path = "#{@base_dir}/#{path}"
+      else
+        path = @path
       end
 
       lines = []

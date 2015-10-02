@@ -39,7 +39,7 @@ command "build" do |c|
 
   c.when_called do |args, opts|
 
-    opts.default file: "docker-rocker",
+    opts.default file: "Dockerfile",
                  tag: nil,
                  no_tag: false
 
@@ -49,14 +49,14 @@ command "build" do |c|
       tag = "-t #{opts.tag}"
     else
       full_tag = "%s/%s" % [ENV["USER"], File.basename(Dir.pwd)]
-      full_tag += ":#{$1}" if opts.file =~ /^docker-rocker\-(.+)$/
+      full_tag += ":#{$1}" if opts.file =~ /^Dockerfile\-(.+)$/
       tag = "-t #{full_tag}"
     end
 
     begin
       temp_file = "docker-rocker-#{SecureRandom.hex(4)}"
       File.open(temp_file, "w") do |f|
-        f.write docker-rocker::Engine.new.render(opts.file)
+        f.write DockerRocker::Engine.new(opts.file).render
       end
       puts "docker build -f #{temp_file} #{tag} ."
       system("docker build -f #{temp_file} #{tag} .")
