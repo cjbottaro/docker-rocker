@@ -1,16 +1,16 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'rockerfile/version'
+require 'docker-rocker/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "rockerfile"
-  spec.version       = Rockerfile::VERSION
+  spec.name          = "docker-rocker"
+  spec.version       = docker-rocker::VERSION
   spec.authors       = ["Christopher J. Bottaro"]
   spec.email         = ["cjbottaro@alumni.cs.utexas.edu"]
 
-  spec.summary       = %q{Ruby + Dockerfile = Rockerfile}
-  spec.description   = %q{Proprocessing for Dockerfiles}
+  spec.summary       = %q{Tools to make working with docker less painful, including a Dockerfile preprocessor}
+  spec.description   = %q{Tools to make working with docker less painful, including a Dockerfile preprocessor}
   spec.homepage      = "TODO: Put your gem's website or public repo URL here."
   spec.license       = "MIT"
 

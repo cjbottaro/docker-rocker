@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-describe Rockerfile do
+describe DockerRocker do
   it 'has a version number' do
-    expect(Rockerfile::VERSION).not_to be nil
+    expect(DockerRocker::VERSION).not_to be nil
   end
 end

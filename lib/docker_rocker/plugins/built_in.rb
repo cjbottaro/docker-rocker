@@ -1,9 +1,9 @@
-require "rockerfile/plugin"
+require "docker_rocker/build/plugin"
 
-module Rockerfile
+module DockerRocker
   module Plugins
     class BuiltIn
-      include Plugin
+      include Build::Plugin
 
       expand "SET" do |line|
         k, v = line.split

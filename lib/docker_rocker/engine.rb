@@ -1,4 +1,4 @@
-module Rockerfile
+module DockerRocker
   class Engine
 
     attr_reader :path, :plugin_manager

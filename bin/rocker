@@ -1,35 +1,35 @@
 #!/usr/bin/env ruby
 
 require "commander/import"
-require "rockerfile"
+require "docker-rocker"
 
 program :version, '1.0.0'
-program :description, 'Build Rockerfiles'
+program :description, 'Build docker-rockers'
 default_command :build
 always_trace!
 
 command "output" do |c|
   c.name = "rocker output"
   c.syntax = "rocker output [options]"
-  c.description = "Output a Dockerfile from a Rockerfile"
+  c.description = "Output a Dockerfile from a docker-rocker"
   c.option "-f",
            "--file STRING",
            String,
-           "File to build. Default: Rockerfile"
+           "File to build. Default: docker-rocker"
 
   c.when_called do |args, opts|
-    puts Rockerfile::Engine.new.render(opts.file)
+    puts docker-rocker::Engine.new.render(opts.file)
   end
 end
 
 command "build" do |c|
   c.name = "rocker build"
   c.syntax = "rocker build [options]"
-  c.description = "Build a Rockerfile"
+  c.description = "Build a docker-rocker"
   c.option "-f",
            "--file STRING",
            String,
-           "File to build. Default: Rockerfile"
+           "File to build. Default: docker-rocker"
   c.option "-t",
            "--tag STRING",
            String,
@@ -39,7 +39,7 @@ command "build" do |c|
 
   c.when_called do |args, opts|
 
-    opts.default file: "Rockerfile",
+    opts.default file: "docker-rocker",
                  tag: nil,
                  no_tag: false
 
@@ -49,14 +49,14 @@ command "build" do |c|
       tag = "-t #{opts.tag}"
     else
       full_tag = "%s/%s" % [ENV["USER"], File.basename(Dir.pwd)]
-      full_tag += ":#{$1}" if opts.file =~ /^Rockerfile\-(.+)$/
+      full_tag += ":#{$1}" if opts.file =~ /^docker-rocker\-(.+)$/
       tag = "-t #{full_tag}"
     end
 
     begin
-      temp_file = "Rockerfile-#{SecureRandom.hex(4)}"
+      temp_file = "docker-rocker-#{SecureRandom.hex(4)}"
       File.open(temp_file, "w") do |f|
-        f.write Rockerfile::Engine.new.render(opts.file)
+        f.write docker-rocker::Engine.new.render(opts.file)
       end
       puts "docker build -f #{temp_file} #{tag} ."
       system("docker build -f #{temp_file} #{tag} .")

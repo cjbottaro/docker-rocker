@@ -1,8 +1,8 @@
 require "spec_helper"
 
-describe Rockerfile::Engine do
+describe DockerRocker::Engine do
 
-  it "creates Dockerfile from Rockerfile" do
+  it "creates Dockerfile from docker-rocker" do
     actual = described_class.new.render("spec/Rockerfile-1.7.2")
     expected = File.read("spec/Dockerfile").strip
 
