@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require "securerandom"
 require "commander/import"
 require "docker-rocker"
 
@@ -18,7 +19,7 @@ command "output" do |c|
            "File to build. Default: docker-rocker"
 
   c.when_called do |args, opts|
-    puts docker-rocker::Engine.new.render(opts.file)
+    puts DockerRocker::Engine.new(opts.file).render
   end
 end
 
@@ -54,7 +55,7 @@ command "build" do |c|
     end
 
     begin
-      temp_file = "docker-rocker-#{SecureRandom.hex(4)}"
+      temp_file = "Dockerfile-#{SecureRandom.hex(4)}"
       File.open(temp_file, "w") do |f|
         f.write DockerRocker::Engine.new(opts.file).render
       end

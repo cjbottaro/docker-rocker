@@ -5,13 +5,13 @@ module DockerRocker
 
     def initialize(path)
       @path = path
-      @base_dir = File.dirname(path)
+      @base_dir = File.dirname(File.expand_path(path))
 
       # Search for plugins before initializing the plugin manager.
       tokens = @base_dir.split("/")
       while !tokens.empty?
         directory = tokens.join("/")
-        Dir.glob("#{directory}/*.drp.rb").each{ |path| require(path) }
+        Dir.glob("#{directory}/*.drp.rb").each{ |path| puts path; require(path) }
         tokens.pop
       end
 

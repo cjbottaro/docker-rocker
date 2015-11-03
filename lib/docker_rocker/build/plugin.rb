@@ -36,10 +36,12 @@ module DockerRocker
           @transformations ||= {}
         end
 
-        def expand(instruction, &block)
+        def instruction(instruction, &block)
           instruction = instruction.to_s.gsub(/\s+/, " ").strip.upcase
           instructions[instruction] = block
         end
+
+        alias_method :expand, :instruction
 
         def transform(regex = /.+/, &block)
           transformations[regex] = block
