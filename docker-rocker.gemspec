@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["cjbottaro@alumni.cs.utexas.edu"]
 
   spec.summary       = %q{Tools to make working with docker less painful, including a Dockerfile preprocessor}
-  spec.description   = %q{Tools to make working with docker less painful, including a Dockerfile preprocessor}
+  spec.description   = %q{So far it's just a Dockerfile preprocessor}
   spec.homepage      = "https://github.com/cjbottaro/docker-rocker"
   spec.license       = "MIT"
 
@@ -29,8 +29,8 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler", "~> 1.10"
   spec.add_development_dependency "rake", "~> 10.0"
-  spec.add_development_dependency "rspec"
-  spec.add_development_dependency "pry"
+  spec.add_development_dependency "rspec", "~> 3.3"
+  spec.add_development_dependency "pry", "~> 0.10.0"
 
-  spec.add_dependency "commander"
+  spec.add_dependency "thor", "~> 0.19.0"
 end

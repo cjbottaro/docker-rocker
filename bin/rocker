@@ -1,68 +1,38 @@
 #!/usr/bin/env ruby
 
 require "securerandom"
-require "commander/import"
+require "thor"
+require "pry"
 require "docker-rocker"
 
-program :version, '1.0.0'
-program :description, 'Build docker-rockers'
-default_command :build
-always_trace!
+module DockerRocker
+  class Cli < Thor
 
-command "output" do |c|
-  c.name = "rocker output"
-  c.syntax = "rocker output [options]"
-  c.description = "Output a Dockerfile from a docker-rocker"
-  c.option "-f",
-           "--file STRING",
-           String,
-           "File to build. Default: docker-rocker"
-
-  c.when_called do |args, opts|
-    puts DockerRocker::Engine.new(opts.file).render
-  end
-end
-
-command "build" do |c|
-  c.name = "rocker build"
-  c.syntax = "rocker build [options]"
-  c.description = "Build a docker-rocker"
-  c.option "-f",
-           "--file STRING",
-           String,
-           "File to build. Default: docker-rocker"
-  c.option "-t",
-           "--tag STRING",
-           String,
-           "Pass through to docker build. Default: <inferred>"
-  c.option "--no-tag",
-           "Do not tag the docker image. Default: false"
-
-  c.when_called do |args, opts|
-
-    opts.default file: "Dockerfile",
-                 tag: nil,
-                 no_tag: false
-
-    if opts.no_tag
-      tag = ""
-    elsif opts.tag
-      tag = "-t #{opts.tag}"
-    else
-      full_tag = "%s/%s" % [ENV["USER"], File.basename(Dir.pwd)]
-      full_tag += ":#{$1}" if opts.file =~ /^Dockerfile\-(.+)$/
-      tag = "-t #{full_tag}"
-    end
-
-    begin
-      temp_file = "Dockerfile-#{SecureRandom.hex(4)}"
-      File.open(temp_file, "w") do |f|
-        f.write DockerRocker::Engine.new(opts.file).render
+    desc "build", "Proxy to docker build that run preprocessor on Dockerfiles"
+    option "file", aliases: "-f", desc: "Name of the Dockerfile", default: "Dockerfile"
+    def build(*args)
+      if options.file == "Dockerfile" && !File.exists?("Dockerfile")
+        system("docker", "build", *args) # Ex: rocker build --help
+      else
+        begin
+          temp_file = "Dockerfile-#{SecureRandom.hex(4)}"
+          File.open(temp_file, "w") do |f|
+            f.write DockerRocker::Engine.new(options.file).render
+          end
+          system("docker", "build", *args)
+        ensure
+          FileUtils.rm_f(temp_file)
+        end
       end
-      puts "docker build -f #{temp_file} #{tag} ."
-      system("docker build -f #{temp_file} #{tag} .")
-    ensure
-      FileUtils.rm_f(temp_file)
     end
+
+    desc "output", "Print to STDOUT a Dockerfile with rocker instructions evaluated."
+    option :file, aliases: "-f", desc: "Name of the Dockerfile", default: "Dockerfile"
+    def output
+      puts DockerRocker::Engine.new(options.file).render
+    end
+
   end
 end
+
+DockerRocker::Cli.start(ARGV)
