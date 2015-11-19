@@ -33,4 +33,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "pry", "~> 0.10.0"
 
   spec.add_dependency "thor", "~> 0.19.0"
+  spec.add_dependency "aws-sdk", "~> 2"
 end

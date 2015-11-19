@@ -19,7 +19,8 @@ module DockerRocker
           File.open(temp_file, "w") do |f|
             f.write DockerRocker::Engine.new(options.file).render
           end
-          system("docker", "build", *args)
+          new_args = ["-f", temp_file] + args
+          system("docker", "build", *new_args)
         ensure
           FileUtils.rm_f(temp_file)
         end
@@ -30,6 +31,12 @@ module DockerRocker
     option :file, aliases: "-f", desc: "Name of the Dockerfile", default: "Dockerfile"
     def output
       puts DockerRocker::Engine.new(options.file).render
+    end
+
+    desc "registry", "Commands to help manage a Docker Registry"
+    def registry
+      require "docker_rocker/registry/garbage_collector"
+      DockerRocker::Registry::GarbageCollector.new("registry.docker.aworks.us/", "us-east-1").call
     end
 
   end
