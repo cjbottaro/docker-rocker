@@ -39,6 +39,27 @@ module DockerRocker
       DockerRocker::Registry::GarbageCollector.new("registry.docker.aworks.us/", "us-east-1").call
     end
 
+    desc "compose", "Use docker-compose with some handy conventions"
+    def compose(*args)
+      name = args.first
+      if File.exists?("#{name}.yml")
+        compose_file = "#{name}.yml"
+      elsif File.exists?("docker-compose-#{name}.yml")
+        compose_file = "docker-compose-#{name}.yml"
+      elsif File.exists?("docker-compose.#{name}.yml")
+        compose_file = "docker-compose.#{name}.yml"
+      else
+        compose_file = nil
+      end
+
+      if compose_file
+        args.shift # This was already captured in local var: name
+        system("docker-compose", "-p", name, "-f", compose_file, *args)
+      else
+        system("docker-compose", *args)
+      end
+    end
+
   end
 end
 
